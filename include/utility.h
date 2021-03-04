@@ -150,6 +150,10 @@ public:
     float globalMapVisualizationPoseDensity;
     float globalMapVisualizationLeafSize;
 
+    //IMU
+    float imu_freq;
+    float imu_ms;
+
     ParamServer()
     {
         nh.param<std::string>("/robot_id", robot_id, "roboat");
@@ -171,6 +175,10 @@ public:
 
         nh.param<bool>("lio_sam/savePCD", savePCD, false);
         nh.param<std::string>("lio_sam/savePCDDirectory", savePCDDirectory, "/Downloads/LOAM/");
+
+        //imu frequency
+        nh.param<float>("lio_sam/imu_freq", imu_freq, 500.0);
+        imu_ms = 1.0/imu_freq;
 
         std::string sensorStr;
         nh.param<std::string>("lio_sam/sensor", sensorStr, "");
