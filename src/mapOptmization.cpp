@@ -151,6 +151,8 @@ public:
     Eigen::Affine3f incrementalOdometryAffineFront;
     Eigen::Affine3f incrementalOdometryAffineBack;
 
+    bool initialized;
+
 
     mapOptimization()
     {
@@ -184,6 +186,7 @@ public:
         downSizeFilterICP.setLeafSize(mappingSurfLeafSize, mappingSurfLeafSize, mappingSurfLeafSize);
         downSizeFilterSurroundingKeyPoses.setLeafSize(surroundingKeyframeDensity, surroundingKeyframeDensity, surroundingKeyframeDensity); // for surrounding key poses of scan-to-map optimization
 
+        initialized = false;
         allocateMemory();
     }
 
@@ -784,20 +787,33 @@ public:
         // save current transformation before any processing
         incrementalOdometryAffineFront = trans2Affine3f(transformTobeMapped);
 
+
         static Eigen::Affine3f lastImuTransformation;
         // initialization
-        if (cloudKeyPoses3D->points.empty())
+        if (cloudKeyPoses3D->points.empty() && !initialized)
         {
             transformTobeMapped[0] = cloudInfo.imuRollInit;
             transformTobeMapped[1] = cloudInfo.imuPitchInit;
             transformTobeMapped[2] = cloudInfo.imuYawInit;
 
             if (!useImuHeadingInitialization)
+		std::cout << "Setting IMU to 0" << std::endl;
                 transformTobeMapped[2] = 0;
+                lastImuTransformation = pcl::getTransformation(0, 0, 0, cloudInfo.imuRollInit, cloudInfo.imuPitchInit, 0); // save imu before return;
+                initialized = true;
+                return;
+
 
             lastImuTransformation = pcl::getTransformation(0, 0, 0, cloudInfo.imuRollInit, cloudInfo.imuPitchInit, cloudInfo.imuYawInit); // save imu before return;
+            initialized = true;
             return;
         }
+
+        if (cloudKeyPoses3D->points.empty() && initialized){
+		std::cout << "Returning already init" << std::endl;
+		return;
+        }
+
 
         // use imu pre-integration estimation for pose guess
         static bool lastImuPreTransAvailable = false;
