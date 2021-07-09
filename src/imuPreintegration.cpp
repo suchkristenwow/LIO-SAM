@@ -478,14 +478,14 @@ public:
             return;
 
         double imuTime = ROS_TIME(&thisImu);
-        std::cout.precision(17);
-        std::cout << "Last IMU Time" << lastImuT_imu << " IMU TIME: " << imuTime << std::endl;
+        //std::cout.precision(17);
+        //std::cout << "Last IMU Time" << lastImuT_imu << " IMU TIME: " << imuTime << std::endl;
         double dt = (lastImuT_imu < 0) ? imu_ms : (imuTime - lastImuT_imu);
-        std::cout << "DT: " << dt << std::endl;
+        //std::cout << "DT: " << dt << std::endl;
         if (dt <= 0.95*imu_ms || dt >= imu_ms*1.95 ){
             imuTime = (imuTime - dt) + imu_ms;
             dt = imu_ms;
-            std::cout << "Correcting DT to: " << dt << std::endl;
+           // std::cout << "Correcting DT to: " << dt << std::endl;
         }
         //assert(dt > 0);
         

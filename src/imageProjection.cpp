@@ -84,6 +84,8 @@ private:
     double timeScanEnd;
     std_msgs::Header cloudHeader;
 
+    bool initialCloud;
+
 
 public:
     ImageProjection():
@@ -100,6 +102,7 @@ public:
         resetParameters();
 
         pcl::console::setVerbosityLevel(pcl::console::L_ERROR);
+        initialCloud = false;
     }
 
     void allocateMemory()
@@ -147,7 +150,9 @@ public:
         sensor_msgs::Imu thisImu = imuConverter(*imuMsg);
 
         std::lock_guard<std::mutex> lock1(imuLock);
-        imuQueue.push_back(thisImu);
+        if(initialCloud){
+            imuQueue.push_back(thisImu);
+        }
 
         // debug IMU data
         // cout << std::setprecision(6);
@@ -175,6 +180,9 @@ public:
 
     void cloudHandler(const sensor_msgs::PointCloud2ConstPtr& laserCloudMsg)
     {
+        if(!initialCloud){
+            initialCloud = true;
+        }
         if (!cachePointCloud(laserCloudMsg))
             return;
 
